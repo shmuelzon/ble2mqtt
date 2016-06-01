@@ -1,0 +1,20 @@
+{
+  "name": "ble2mqtt",
+  "version": "1.0.0",
+  "description": "A BLE to MQTT bridge",
+  "main": "app.js",
+  "scripts": {
+    "start": "DEBUG=ble2mqtt node app.js",
+    "dev": "DEBUG=* node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "shmuelzon",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "dbus": "0.2.19",
+    "debug": "2.2.0",
+    "mqtt": "1.10.0",
+    "underscore": "1.8.3"
+  }
+}
