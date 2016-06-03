@@ -27,7 +27,7 @@ writing a 64-bit value would look like `10,231,32,24`.
 * Pretty names (should be configurable):
   * Use alias instead of MAC address (?)
   * ~~Use service/characteristic name instead of UUID~~
-    * Extendable via configuration file
+    * ~~Extendable via configuration file~~
 * Pretty values (convert byte array to Boolean, String, etc.):
   * Configuration file can define custom characteristics
 * Refactoring

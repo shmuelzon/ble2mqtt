@@ -11,6 +11,10 @@ var characteristics = {};
 
 var mqtt = _mqtt.connect(config.mqtt.server);
 
+/* Add user-defined names from the configuration file */
+_.extend(servicesList, config.ble.services);
+_.extend(characteristicsList, config.ble.characteristics);
+
 function getServiceName(service) {
   var name = servicesList[service.UUID];
   return name ? name : service.UUID;
