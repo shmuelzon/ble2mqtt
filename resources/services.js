@@ -1,0 +1,42 @@
+/* The services table was copied (to the clipboard) from
+ * https://developer.bluetooth.org/gatt/services/Pages/ServicesHome.aspx
+ * and converted to JSON using:
+ * pbpaste | awk -F $'\t' '{ gsub (" ", "", $1); gsub ("0x","",$3); print "  \"0000" $3 "-0000-1000-8000-00805f9b34fb\": \"" $1 "\","}' | pbcopy
+ */
+module.exports = {
+  "00001811-0000-1000-8000-00805f9b34fb": "AlertNotificationService",
+  "00001815-0000-1000-8000-00805f9b34fb": "AutomationIO",
+  "0000180f-0000-1000-8000-00805f9b34fb": "BatteryService",
+  "00001810-0000-1000-8000-00805f9b34fb": "BloodPressure",
+  "0000181b-0000-1000-8000-00805f9b34fb": "BodyComposition",
+  "0000181e-0000-1000-8000-00805f9b34fb": "BondManagement",
+  "0000181f-0000-1000-8000-00805f9b34fb": "ContinuousGlucoseMonitoring",
+  "00001805-0000-1000-8000-00805f9b34fb": "CurrentTimeService",
+  "00001818-0000-1000-8000-00805f9b34fb": "CyclingPower",
+  "00001816-0000-1000-8000-00805f9b34fb": "CyclingSpeedandCadence",
+  "0000180a-0000-1000-8000-00805f9b34fb": "DeviceInformation",
+  "0000181a-0000-1000-8000-00805f9b34fb": "EnvironmentalSensing",
+  "00001800-0000-1000-8000-00805f9b34fb": "GenericAccess",
+  "00001801-0000-1000-8000-00805f9b34fb": "GenericAttribute",
+  "00001808-0000-1000-8000-00805f9b34fb": "Glucose",
+  "00001809-0000-1000-8000-00805f9b34fb": "HealthThermometer",
+  "0000180d-0000-1000-8000-00805f9b34fb": "HeartRate",
+  "00001823-0000-1000-8000-00805f9b34fb": "HTTPProxy",
+  "00001812-0000-1000-8000-00805f9b34fb": "HumanInterfaceDevice",
+  "00001802-0000-1000-8000-00805f9b34fb": "ImmediateAlert",
+  "00001821-0000-1000-8000-00805f9b34fb": "IndoorPositioning",
+  "00001820-0000-1000-8000-00805f9b34fb": "InternetProtocolSupport",
+  "00001803-0000-1000-8000-00805f9b34fb": "LinkLoss",
+  "00001819-0000-1000-8000-00805f9b34fb": "LocationandNavigation",
+  "00001807-0000-1000-8000-00805f9b34fb": "NextDSTChangeService",
+  "00001825-0000-1000-8000-00805f9b34fb": "ObjectTransfer",
+  "0000180e-0000-1000-8000-00805f9b34fb": "PhoneAlertStatusService",
+  "00001822-0000-1000-8000-00805f9b34fb": "PulseOximeter",
+  "00001806-0000-1000-8000-00805f9b34fb": "ReferenceTimeUpdateService",
+  "00001814-0000-1000-8000-00805f9b34fb": "RunningSpeedandCadence",
+  "00001813-0000-1000-8000-00805f9b34fb": "ScanParameters",
+  "00001824-0000-1000-8000-00805f9b34fb": "TransportDiscovery",
+  "00001804-0000-1000-8000-00805f9b34fb": "TxPower",
+  "0000181c-0000-1000-8000-00805f9b34fb": "UserData",
+  "0000181d-0000-1000-8000-00805f9b34fb": "WeightScale",
+}

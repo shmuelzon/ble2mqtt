@@ -8,8 +8,7 @@ For example, if a device with a MAC address of `A0:E6:F8:50:72:53` exposes the
 [0000180f-0000-1000-8000-00805f9b34fb service](https://developer.bluetooth.org/gatt/services/Pages/ServiceViewer.aspx?u=org.bluetooth.service.battery_service.xml)
 (Battery Service) which includes the
 [00002a19-0000-1000-8000-00805f9b34fb characteristic](https://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.battery_level.xml)
-(Battery Level), the
-`A0:E6:F8:50:72:53/0000180f-0000-1000-8000-00805f9b34fb/00002a19-0000-1000-8000-00805f9b34fb`
+(Battery Level), the `A0:E6:F8:50:72:53/BatteryService/BatteryLevel`
 MQTT topic is published with a value representing the battery level.
 
 In order to set a GATT value, publish a message to a writable characteristic
@@ -27,7 +26,7 @@ writing a 64-bit value would look like `10,231,32,24`.
     anything? What happens to events on removed devices?
 * Pretty names (should be configurable):
   * Use alias instead of MAC address (?)
-  * Use service/characteristic name instead of UUID
+  * ~~Use service/characteristic name instead of UUID~~
     * Extendable via configuration file
 * Pretty values (convert byte array to Boolean, String, etc.):
   * Configuration file can define custom characteristics

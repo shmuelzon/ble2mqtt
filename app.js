@@ -3,11 +3,23 @@ var _ = require('underscore');
 var _mqtt = require('mqtt');
 var bluez = require('./Bluez');
 var config = require('./config');
+var servicesList = require('./resources/services');
+var characteristicsList = require('./resources/characteristics');
 
 var adapters = [];
 var characteristics = {};
 
 var mqtt = _mqtt.connect(config.mqtt.server);
+
+function getServiceName(service) {
+  var name = servicesList[service.UUID];
+  return name ? name : service.UUID;
+}
+
+function getCharacteristicName(characteristic) {
+  var name = characteristicsList[characteristic.UUID]
+  return name ? name : characteristic.UUID;
+}
 
 mqtt.on('connect', function(connack) {
   debug('Connected to MQTT server');
@@ -42,8 +54,8 @@ bluez.on('adapter', function(adapter) {
       service.on('characteristic', function(characteristic) {
         debug('Found new characteristic: ' + characteristic.UUID + ' (' +
           characteristic.Flags + ')');
-        var get_topic = device.Address + '/' + service.UUID + '/' +
-          characteristic.UUID;
+        var get_topic = device.Address + '/' + getServiceName(service) + '/' +
+          getCharacteristicName(characteristic);
         var set_topic = get_topic + '/set';
 
         /* Listen on notifications */
