@@ -2,11 +2,12 @@ var debug = require('debug')('ble2mqtt');
 var _ = require('underscore');
 var _mqtt = require('mqtt');
 var bluez = require('./Bluez');
+var config = require('./config');
 
 var adapters = [];
 var characteristics = {};
 
-var mqtt = _mqtt.connect('mqtt://localhost');
+var mqtt = _mqtt.connect(config.mqtt.server);
 
 mqtt.on('connect', function(connack) {
   debug('Connected to MQTT server');

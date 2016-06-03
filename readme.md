@@ -19,7 +19,7 @@ writing a 64-bit value would look like `10,231,32,24`.
 ## To Do
 
 * Add configuration file:
-  * MQTT settings
+  * ~~MQTT settings~~
   * Single/Split topic for get/set
   * MQTT topic prefix (to distinguish between different instances of the app)
 * Error handling:
