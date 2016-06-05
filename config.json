@@ -6,6 +6,9 @@
     },
     "publish": {
       "retain": true
+    },
+    "topics" :{
+      "set_suffix": "/Set"
     }
   },
   "ble": {

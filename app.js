@@ -60,7 +60,7 @@ bluez.on('adapter', function(adapter) {
           characteristic.Flags + ')');
         var get_topic = device.Address + '/' + getServiceName(service) + '/' +
           getCharacteristicName(characteristic);
-        var set_topic = get_topic + '/set';
+        var set_topic = get_topic + config.mqtt.topics.set_suffix;
 
         /* Listen on notifications */
         if (characteristic.Flags.indexOf('notify') !== -1)

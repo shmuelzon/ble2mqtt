@@ -12,14 +12,14 @@ For example, if a device with a MAC address of `A0:E6:F8:50:72:53` exposes the
 MQTT topic is published with a value representing the battery level.
 
 In order to set a GATT value, publish a message to a writable characteristic
-using the above format suffixed with `/set`. Note that values are byte arrays so
+using the above format suffixed with `/Set`. Note that values are byte arrays so
 writing a 64-bit value would look like `10,231,32,24`.
 
 ## To Do
 
 * Add configuration file:
   * ~~MQTT settings~~
-  * Single/Split topic for get/set
+  * ~~Single/Split topic for get/set~~
   * MQTT topic prefix (to distinguish between different instances of the app)
 * Error handling:
   * What happens when an adapter/device is disconnected? Do we need to cleanup
