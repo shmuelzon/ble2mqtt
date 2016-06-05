@@ -73,7 +73,7 @@ bluez.on('adapter', function(adapter) {
         characteristic.on('propertyChanged', function(key, value) {
           if (key === 'Value') {
             debug('Got new value for ' + characteristic.UUID + ': ' + value);
-            mqtt.publish(get_topic, value.toString());
+            mqtt.publish(get_topic, value.toString(), config.mqtt.publish);
           }
         });
 
