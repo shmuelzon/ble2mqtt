@@ -25,7 +25,9 @@ writing a 64-bit value would look like `10,231,32,24`.
   * What happens when an adapter/device is disconnected? Do we need to cleanup
     anything? What happens to events on removed devices?
 * Pretty names (should be configurable):
-  * Use alias instead of MAC address (?)
+  * ~~Allow using different properties as device name~~
+    * Listen on changes in the property used for the device name as if it
+      changes, topic names (both published and subscribed) need to be updated
   * ~~Use service/characteristic name instead of UUID~~
     * ~~Extendable via configuration file~~
 * Pretty values (convert byte array to Boolean, String, etc.):

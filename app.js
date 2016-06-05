@@ -58,8 +58,8 @@ bluez.on('adapter', function(adapter) {
       service.on('characteristic', function(characteristic) {
         debug('Found new characteristic: ' + characteristic.UUID + ' (' +
           characteristic.Flags + ')');
-        var get_topic = device.Address + '/' + getServiceName(service) + '/' +
-          getCharacteristicName(characteristic);
+        var get_topic = device[config.mqtt.topics.device_name] + '/' +
+          getServiceName(service) + '/' + getCharacteristicName(characteristic);
         var set_topic = get_topic + config.mqtt.topics.set_suffix;
 
         /* Listen on notifications */
