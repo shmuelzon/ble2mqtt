@@ -61,7 +61,7 @@ BluezCharacteristic.prototype.Read = function(cb) {
     this.debug('Failed reading: ' + err);
     if (cb) cb(err);
   }.bind(this);
-  this.iface.ReadValue();
+  this.iface.ReadValue({});
 }
 
 BluezCharacteristic.prototype.Write = function(value, cb) {
@@ -73,7 +73,7 @@ BluezCharacteristic.prototype.Write = function(value, cb) {
     this.debug('Failed writing: ' + err);
     if (cb) cb(err);
   }.bind(this);
-  this.iface.WriteValue(value);
+  this.iface.WriteValue(value, {});
 }
 
 BluezCharacteristic.prototype.NotifyStart = function(cb) {
