@@ -25,6 +25,19 @@ function getCharacteristicName(characteristic) {
   return name ? name : characteristic.UUID;
 }
 
+function shouldConnect(device) {
+  /* Action taken if device is in the list */
+  var action = config.ble.whitelist ? true : false;
+  var list = config.ble.whitelist ? config.ble.whitelist : config.ble.blacklist;
+  var str = device.Address;
+
+  /* No list was defined, accept all */
+  if (!list)
+    return true;
+
+  return _(list).find(item => str.search(item) !== -1) ? action : !action;
+}
+
 mqtt.on('connect', function(connack) {
   debug('Connected to MQTT server');
 });
@@ -50,6 +63,7 @@ bluez.on('adapter', function(adapter) {
   adapters.push(adapter);
 
   adapter.on('device', function(device) {
+    if (!shouldConnect(device)) return;
     debug('Found new device: ' + device.Address + ' (' + device.Alias +')');
 
     device.on('service', function(service) {
