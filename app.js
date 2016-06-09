@@ -96,11 +96,16 @@ bluez.on('adapter', function(adapter) {
     if (err) return;
 
     debug('Powered on ' + adapter);
-    adapter.discoveryStart(function(err) {
+    adapter.discoveryFilterSet({ 'Transport': 'le' }, function(err) {
       if (err) return;
 
-      debug('Started discovery on ' + adapter);
-    });
+      debug('Filtered only LE devices');
+      adapter.discoveryStart(function(err) {
+        if (err) return;
+
+        debug('Started discovery on ' + adapter);
+      });
+    })
   });
 });
 

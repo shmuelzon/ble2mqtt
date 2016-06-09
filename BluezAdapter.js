@@ -161,3 +161,15 @@ BluezAdapter.prototype.discoveryStop = function(cb) {
   }.bind(this);
   this.iface.StopDiscovery();
 }
+
+BluezAdapter.prototype.discoveryFilterSet = function(filter, cb) {
+  this.iface.SetDiscoveryFilter['finish'] = function() {
+    this.debug('Set discovery filter:', filter);
+    if (cb) cb();
+  }.bind(this);
+  this.iface.SetDiscoveryFilter['error'] = function(err) {
+    this.debug('Failed setting discovery filter: ' + err);
+    if (cb) cb(err);
+  }.bind(this);
+  this.iface.SetDiscoveryFilter(filter);
+}
