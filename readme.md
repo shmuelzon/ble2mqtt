@@ -21,9 +21,9 @@ writing a 64-bit value would look like `10,231,32,24`.
   * ~~MQTT settings~~
   * ~~Single/Split topic for get/set~~
   * MQTT topic prefix (to distinguish between different instances of the app)
-* Error handling:
-  * What happens when an adapter/device is disconnected? Do we need to cleanup
-    anything? What happens to events on removed devices?
+* ~~Error handling:~~
+  * ~~What happens when an adapter/device is disconnected? Do we need to cleanup
+    anything? What happens to events on removed devices?~~
 * Pretty names (should be configurable):
   * ~~Allow using different properties as device name~~
     * Listen on changes in the property used for the device name as if it

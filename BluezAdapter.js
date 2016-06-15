@@ -27,7 +27,7 @@ BluezAdapter.prototype.init = function(cb) {
       this.iface = iface;
 
       /* Get Protperties interface */
-      bluezDBus.getProperties(this.path, 'org.bluez.Adapter1',
+      this.props = bluezDBus.getProperties(this.path, 'org.bluez.Adapter1',
         this._devicePropertiesUpdate.bind(this), /* Property changed */
         function(err) { /* All propertires were resolved */
           if (err) {
@@ -36,14 +36,15 @@ BluezAdapter.prototype.init = function(cb) {
             return;
           }
 
-          /* The new adapter is ready */
-          if (cb) cb();
+          /* The new adapter is ready, wait 2 seconds until it settles down */
+          if (cb) setTimeout(cb, 2000);
         }.bind(this));
     }.bind(this)
   );
 
-  bluezDBus.on('interfaceAdded', this._interfaceAdded.bind(this));
-  bluezDBus.on('interfaceRemoved', this._interfaceRemoved.bind(this));
+  /* Save the event handler so we can remove it later */
+  this.ifaceEvents = bluezDBus.onInterfaces(this._interfaceAdded.bind(this),
+    this._interfaceRemoved.bind(this));
 }
 
 BluezAdapter.prototype.toString = function() {
@@ -109,11 +110,14 @@ BluezAdapter.prototype._interfaceAdded = function(path, objects) {
 }
 
 BluezAdapter.prototype._interfaceRemoved = function(path, objects) {
-  /* We're only interested in devices under this adapter  */
-  if (!this._isOwnDevice(path, objects))
+  /* We're only interested in ourselves */
+  if (this.path !== path)
     return;
 
-  this.debug('A device was removed: ' + path);
+  this.emit('removed');
+  this.removeAllListeners();
+  this.props.close();
+  this.ifaceEvents.close();
 }
 
 BluezAdapter.prototype.powerOn = function(cb) {
@@ -172,4 +176,16 @@ BluezAdapter.prototype.discoveryFilterSet = function(filter, cb) {
     if (cb) cb(err);
   }.bind(this);
   this.iface.SetDiscoveryFilter(filter);
+}
+
+BluezAdapter.prototype.removeDevice = function(device, cb) {
+  this.iface.RemoveDevice['finish'] = function() {
+    this.debug('Removed device');
+    if (cb) cb();
+  }.bind(this);
+  this.iface.RemoveDevice['error'] = function(err) {
+    this.debug('Failed removing device: ' + err);
+    if (cb) cb(err);
+  }.bind(this);
+  this.iface.RemoveDevice(device.path);
 }

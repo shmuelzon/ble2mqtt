@@ -6,7 +6,7 @@ var config = require('./config');
 var servicesList = require('./resources/services');
 var characteristicsList = require('./resources/characteristics');
 
-var adapters = [];
+var adapters = {}
 var characteristics = {};
 
 var mqtt = _mqtt.connect(config.mqtt.server);
@@ -60,7 +60,7 @@ mqtt.on('message', function(topic, message) {
 
 bluez.on('adapter', function(adapter) {
   debug('Found new adapter: ' + adapter);
-  adapters.push(adapter);
+  adapters[adapter.path] = adapter;
 
   adapter.on('device', function(device) {
     if (!shouldConnect(device)) return;
@@ -91,6 +91,13 @@ bluez.on('adapter', function(adapter) {
           }
         });
 
+        characteristic.on('removed', function() {
+          /* The characteristic was removed, unsubscribe from the MQTT topic */
+          debug('Removed characteristic: ' + characteristic.UUID);
+          mqtt.unsubscribe(set_topic);
+          delete characteristics[set_topic];
+        });
+
         /* If characteristic is writable, allow setting it via MQTT */
         if (characteristic.Flags.indexOf('write') !== -1) {
           characteristics[set_topic] = characteristic;
@@ -99,11 +106,33 @@ bluez.on('adapter', function(adapter) {
       });
     });
 
+    device.on('propertyChanged', function (key, value) {
+      if (key === 'Connected' && value === false) {
+        debug('Disconnected from ' + device);
+        /* We'll now remove the device. This will also remove all of the
+         * services and characteristics of this device which will remove the
+         * event listeners and allow cleaning up the MQTT related subscriptions.
+         * If the device is still around, we'll discover it again, reconnect and
+         * resubscribe to the MQTT topics */
+        setImmediate(() => adapter.removeDevice(device));
+      }
+    });
+
     device.Connect(function(err) {
-      if (err) return;
+      if (err) {
+        debug('Failed connecting to ' + device + ': ' + err);
+        /* Remove the device so it will be rediscovered when it's available */
+        setImmediate(() => adapter.removeDevice(device));
+        return;
+      }
 
       debug('Connected to ' + device);
     });
+  });
+
+  adapter.on('removed', function() {
+    debug(adapter + ' was removed');
+    delete adapters[adapter.path];
   });
 
   adapter.powerOn(function(err) {
@@ -131,11 +160,10 @@ function cleanupAndExit() {
   mqtt.end();
 
   /* Turn off all adapters (will also disconnect from devices) */
-  var adaptersLength = adapters.length;
-  tasks += adaptersLength;
-  for (var i = 0; i < adaptersLength; i++) {
-    adapters[i].powerOff(function() { tasks--; });
-  }
+  _(adapters).each(function(adapter) {
+    tasks++;
+    adapter.powerOff(function() { tasks--; });
+  });
 
   /* Wait for operations to end, then exit */
   setInterval(function() { if (tasks == 0) process.exit(0); }, 100);

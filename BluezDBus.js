@@ -23,6 +23,11 @@ function _notifyPropertyChange(func, properties) {
 
 bluezDBus.setMaxListeners(Infinity);
 bluezDBus.getProperties = function(path, interfaceName, propertyChangedCb, resolvedCb) {
+  var ctx = {
+    close: function() {
+      this.iface.removeListener('PropertiesChanged', this.cb);
+    }
+  }
   bluezDBus.getInterface(path, 'org.freedesktop.DBus.Properties',
     function(err, iface) {
       if (err) {
@@ -30,13 +35,16 @@ bluezDBus.getProperties = function(path, interfaceName, propertyChangedCb, resol
         return;
       }
 
-      /* Listen on changes */
-      iface.on('PropertiesChanged', function(_interfaceName, properties) {
+      /* Save interface an callback so we can unregister later */
+      ctx.iface = iface;
+      ctx.cb = function(_interfaceName, properties) {
         if (_interfaceName !== interfaceName)
           return;
 
         _notifyPropertyChange(propertyChangedCb, properties);
-      });
+      };
+      /* Listen on changes */
+      iface.on('PropertiesChanged', ctx.cb);
 
       /* Get all properties */
       iface.GetAll['finish'] = function(properties) {
@@ -49,6 +57,8 @@ bluezDBus.getProperties = function(path, interfaceName, propertyChangedCb, resol
       iface.GetAll(interfaceName);
     }
   );
+
+  return ctx;
 }
 
 bluezDBus.getAllObjects = function(cb) {
@@ -66,6 +76,23 @@ bluezDBus.getAllObjects = function(cb) {
 
   /* Initiate call */
   objectManagerInterface.GetManagedObjects();
+}
+
+bluezDBus.onInterfaces = function(interfaceAddedCb, interfaceRemovedCb) {
+  if (interfaceAddedCb) this.on('interfaceAdded', interfaceAddedCb);
+  if (interfaceRemovedCb) this.on('interfaceRemoved', interfaceRemovedCb);
+
+  return {
+    _addedCb: interfaceAddedCb,
+    _removedCb: interfaceRemovedCb,
+    _bluezDBus: this,
+    close: function() {
+      if (this._addedCb)
+        this._bluezDBus.removeListener('interfaceAdded', this._addedCb);
+      if (this._removedCb)
+      this._bluezDBus.removeListener('interfaceRemoved', this._removedCb);
+    }
+  };
 }
 
 /* Get ObjectManager and register events */

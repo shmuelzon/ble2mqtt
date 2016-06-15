@@ -27,7 +27,7 @@ BluezDevice.prototype.init = function(cb) {
       this.iface = iface;
 
       /* Get Protperties interface */
-      bluezDBus.getProperties(this.path, 'org.bluez.Device1',
+      this.props = bluezDBus.getProperties(this.path, 'org.bluez.Device1',
         this._devicePropertiesUpdate.bind(this), /* Property changed */
         function(err) { /* All propertires were resolved */
           if (err) {
@@ -42,8 +42,9 @@ BluezDevice.prototype.init = function(cb) {
     }.bind(this)
   );
 
-  bluezDBus.on('interfaceAdded', this._interfaceAdded.bind(this));
-  bluezDBus.on('interfaceRemoved', this._interfaceRemoved.bind(this));
+  /* Save the event handler so we can remove it later */
+  this.ifaceEvents = bluezDBus.onInterfaces(this._interfaceAdded.bind(this),
+    this._interfaceRemoved.bind(this));
 }
 
 BluezDevice.prototype.toString = function() {
@@ -109,11 +110,15 @@ BluezDevice.prototype._interfaceAdded = function(path, objects) {
 }
 
 BluezDevice.prototype._interfaceRemoved = function(path, objects) {
-  /* We're only interested in services under this device  */
-  if (!this._isOwnService(path, objects))
+  /* We're only interested in ourselves */
+  if (this.path !== path)
     return;
 
-  this.debug('A service was removed: ' + path);
+  this.debug('Removed device');
+  this.emit('removed');
+  this.removeAllListeners();
+  this.props.close();
+  this.ifaceEvents.close();
 }
 
 BluezDevice.prototype.Connect = function(cb) {

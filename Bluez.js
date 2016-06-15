@@ -21,14 +21,6 @@ function interfaceAdded(path, objects) {
   });
 }
 
-function interfaceRemoved(path, objects) {
-  /* We're only interested in adapters */
-  if (objects['org.bluez.Adapter1'] === undefined)
-    return;
-
-  debug('An adapter was removed: ' + path);
-}
-
 bluezDBus.getAllObjects(function(err, objects) {
   if (err)
     throw 'Failed getting all objects';
@@ -38,7 +30,6 @@ bluezDBus.getAllObjects(function(err, objects) {
   });
 });
 
-bluezDBus.on('interfaceAdded', interfaceAdded);
-bluezDBus.on('interfaceRemoved', interfaceRemoved);
+bluezDBus.onInterfaces(interfaceAdded);
 
 module.exports = bluez;

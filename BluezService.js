@@ -27,7 +27,7 @@ BluezService.prototype.init = function(cb) {
       this.iface = iface;
 
       /* Get Protperties interface */
-      bluezDBus.getProperties(this.path, 'org.bluez.GattService1',
+      this.props = bluezDBus.getProperties(this.path, 'org.bluez.GattService1',
         this._servicePropertiesUpdate.bind(this), /* Property changed */
         function(err) { /* All propertires were resolved */
           if (err) {
@@ -53,8 +53,9 @@ BluezService.prototype.init = function(cb) {
     }.bind(this)
   );
 
-  bluezDBus.on('interfaceAdded', this._interfaceAdded.bind(this));
-  bluezDBus.on('interfaceRemoved', this._interfaceRemoved.bind(this));
+  /* Save the event handler so we can remove it later */
+  this.ifaceEvents = bluezDBus.onInterfaces(this._interfaceAdded.bind(this),
+    this._interfaceRemoved.bind(this));
 }
 
 BluezService.prototype.toString = function() {
@@ -96,9 +97,13 @@ BluezService.prototype._interfaceAdded = function(path, objects) {
 }
 
 BluezService.prototype._interfaceRemoved = function(path, objects) {
-  /* We're only interested in characteristics under this service  */
-  if (!this._isOwnCharacteristic(path, objects))
+  /* We're only interested in ourselves */
+  if (this.path !== path)
     return;
 
-  this.debug('A characteristic was removed: ' + path);
+  this.debug('Removed service');
+  this.emit('removed');
+  this.removeAllListeners();
+  this.props.close();
+  this.ifaceEvents.close();
 }

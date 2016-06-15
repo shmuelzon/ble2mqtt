@@ -26,7 +26,8 @@ BluezCharacteristic.prototype.init = function(cb) {
       this.iface = iface;
 
       /* Get Protperties interface */
-      bluezDBus.getProperties(this.path, 'org.bluez.GattCharacteristic1',
+      this.props = bluezDBus.getProperties(this.path,
+        'org.bluez.GattCharacteristic1',
         this._characteristicPropertiesUpdate.bind(this), /* Property changed */
         function(err) { /* All propertires were resolved */
           if (err) {
@@ -40,6 +41,10 @@ BluezCharacteristic.prototype.init = function(cb) {
         }.bind(this));
     }.bind(this)
   );
+
+  /* Save the event handler so we can remove it later */
+  this.ifaceEvents = bluezDBus.onInterfaces(null,
+    this._interfaceRemoved.bind(this));
 }
 
 BluezCharacteristic.prototype.toString = function() {
@@ -50,6 +55,18 @@ BluezCharacteristic.prototype._characteristicPropertiesUpdate = function(key, va
   this.debug(key + ' changed from ' + this[key] + ' to ' + value);
   this[key] = value;
   this.emit('propertyChanged', key, value);
+}
+
+BluezCharacteristic.prototype._interfaceRemoved = function(path, objects) {
+  /* We're only interested in ourselves */
+  if (this.path !== path)
+    return;
+
+  this.debug('Removed characteristic');
+  this.emit('removed');
+  this.removeAllListeners();
+  this.props.close();
+  this.ifaceEvents.close();
 }
 
 BluezCharacteristic.prototype.Read = function(cb) {
