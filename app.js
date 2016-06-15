@@ -1,10 +1,10 @@
-var debug = require('debug')('ble2mqtt');
-var _ = require('underscore');
-var _mqtt = require('mqtt');
-var bluez = require('./Bluez');
-var config = require('./config');
-var servicesList = require('./resources/services');
-var characteristicsList = require('./resources/characteristics');
+const debug = require('debug')('ble2mqtt');
+const _ = require('underscore');
+const _mqtt = require('mqtt');
+const bluez = require('./Bluez');
+const config = require('./config');
+const servicesList = require('./resources/services');
+const characteristicsList = require('./resources/characteristics');
 
 var adapters = {}
 var characteristics = {};
@@ -38,11 +38,9 @@ function shouldConnect(device) {
   return _(list).find(item => str.search(item) !== -1) ? action : !action;
 }
 
-mqtt.on('connect', function(connack) {
-  debug('Connected to MQTT server');
-});
+mqtt.on('connect', (connack) => debug('Connected to MQTT server'));
 
-mqtt.on('message', function(topic, message) {
+mqtt.on('message', (topic, message) => {
   var c = characteristics[topic];
   if (!c)
     return;
@@ -55,21 +53,21 @@ mqtt.on('message', function(topic, message) {
 
   /* Write the new value and read it back */
   debug('Writing ' + newVal + ' to ' + c.UUID);
-  c.Write(newVal, function() { c.Read() });
+  c.Write(newVal, () => c.Read());
 });
 
-bluez.on('adapter', function(adapter) {
+bluez.on('adapter', (adapter) => {
   debug('Found new adapter: ' + adapter);
   adapters[adapter.path] = adapter;
 
-  adapter.on('device', function(device) {
+  adapter.on('device', (device) => {
     if (!shouldConnect(device)) return;
     debug('Found new device: ' + device.Address + ' (' + device.Alias +')');
 
-    device.on('service', function(service) {
+    device.on('service', (service) => {
       debug('Found new service: ' + service.UUID);
 
-      service.on('characteristic', function(characteristic) {
+      service.on('characteristic', (characteristic) => {
         debug('Found new characteristic: ' + characteristic.UUID + ' (' +
           characteristic.Flags + ')');
         var get_topic = device[config.mqtt.topics.device_name] + '/' +
@@ -84,14 +82,14 @@ bluez.on('adapter', function(adapter) {
         if (characteristic.Flags.indexOf('read') !== -1)
           characteristic.Read(); /* We'll get the value in the Value property */
 
-        characteristic.on('propertyChanged', function(key, value) {
+        characteristic.on('propertyChanged', (key, value) => {
           if (key === 'Value') {
             debug('Got new value for ' + characteristic.UUID + ': ' + value);
             mqtt.publish(get_topic, value.toString(), config.mqtt.publish);
           }
         });
 
-        characteristic.on('removed', function() {
+        characteristic.on('removed', () => {
           /* The characteristic was removed, unsubscribe from the MQTT topic */
           debug('Removed characteristic: ' + characteristic.UUID);
           mqtt.unsubscribe(set_topic);
@@ -106,7 +104,7 @@ bluez.on('adapter', function(adapter) {
       });
     });
 
-    device.on('propertyChanged', function (key, value) {
+    device.on('propertyChanged', (key, value) => {
       if (key === 'Connected' && value === false) {
         debug('Disconnected from ' + device);
         /* We'll now remove the device. This will also remove all of the
@@ -118,7 +116,7 @@ bluez.on('adapter', function(adapter) {
       }
     });
 
-    device.Connect(function(err) {
+    device.Connect((err) => {
       if (err) {
         debug('Failed connecting to ' + device + ': ' + err);
         /* Remove the device so it will be rediscovered when it's available */
@@ -130,20 +128,20 @@ bluez.on('adapter', function(adapter) {
     });
   });
 
-  adapter.on('removed', function() {
+  adapter.on('removed', () => {
     debug(adapter + ' was removed');
     delete adapters[adapter.path];
   });
 
-  adapter.powerOn(function(err) {
+  adapter.powerOn((err) => {
     if (err) return;
 
     debug('Powered on ' + adapter);
-    adapter.discoveryFilterSet({ 'Transport': 'le' }, function(err) {
+    adapter.discoveryFilterSet({ 'Transport': 'le' }, (err) => {
       if (err) return;
 
       debug('Filtered only LE devices');
-      adapter.discoveryStart(function(err) {
+      adapter.discoveryStart((err) => {
         if (err) return;
 
         debug('Started discovery on ' + adapter);
@@ -160,13 +158,13 @@ function cleanupAndExit() {
   mqtt.end();
 
   /* Turn off all adapters (will also disconnect from devices) */
-  _(adapters).each(function(adapter) {
+  _(adapters).each((adapter) => {
     tasks++;
-    adapter.powerOff(function() { tasks--; });
+    adapter.powerOff(() => tasks--);
   });
 
   /* Wait for operations to end, then exit */
-  setInterval(function() { if (tasks == 0) process.exit(0); }, 100);
+  setInterval(() => { if (tasks == 0) process.exit(0); }, 100);
 }
 process.on('SIGINT', cleanupAndExit);
 process.on('SIGTERM', cleanupAndExit);

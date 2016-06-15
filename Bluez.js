@@ -1,7 +1,7 @@
-var events = require('events');
-var debug = require('debug')('Bluez');
-var bluezDBus = require('./BluezDBus');
-var BluezAdapter = require('./BluezAdapter');
+const events = require('events');
+const debug = require('debug')('Bluez');
+const bluezDBus = require('./BluezDBus');
+const BluezAdapter = require('./BluezAdapter');
 
 var bluez = new events.EventEmitter();
 
@@ -12,7 +12,7 @@ function interfaceAdded(path, objects) {
 
   debug('An adapter was added: ' + path);
   var adapter = new BluezAdapter(path);
-  adapter.init(function(err) {
+  adapter.init((err) => {
     if (err) {
       debug('Failed initializing new adapter ' + path + ': ' + err);
       return;
@@ -25,9 +25,7 @@ bluezDBus.getAllObjects(function(err, objects) {
   if (err)
     throw 'Failed getting all objects';
 
-  Object.keys(objects).forEach(function(key) {
-    interfaceAdded(key, objects[key]);
-  });
+  Object.keys(objects).forEach((key) => interfaceAdded(key, objects[key]));
 });
 
 bluezDBus.onInterfaces(interfaceAdded);

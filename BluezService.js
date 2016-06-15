@@ -1,7 +1,7 @@
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var bluezDBus = require('./BluezDBus');
-var BluezCharacteristic = require('./BluezCharacteristic');
+const EventEmitter = require('events').EventEmitter;
+const util = require('util');
+const bluezDBus = require('./BluezDBus');
+const BluezCharacteristic = require('./BluezCharacteristic');
 
 module.exports = BluezService;
 
@@ -15,43 +15,41 @@ util.inherits(BluezService, EventEmitter);
 
 BluezService.prototype.init = function(cb) {
   /* Get GattService1 interface */
-  bluezDBus.getInterface(this.path, 'org.bluez.GattService1',
-    function(err, iface) {
-      if (err) {
-        this.debug('Failed getting GattService1 interface:' + err);
-        if (cb) cb(err);
-        return;
-      }
+  bluezDBus.getInterface(this.path, 'org.bluez.GattService1', (err, iface) => {
+    if (err) {
+      this.debug('Failed getting GattService1 interface:' + err);
+      if (cb) cb(err);
+      return;
+    }
 
-      /* Save this interface */
-      this.iface = iface;
+    /* Save this interface */
+    this.iface = iface;
 
-      /* Get Protperties interface */
-      this.props = bluezDBus.getProperties(this.path, 'org.bluez.GattService1',
-        this._servicePropertiesUpdate.bind(this), /* Property changed */
-        function(err) { /* All propertires were resolved */
-          if (err) {
-            this.debug('Failed getting all properties:' + err);
-            if (cb) cb(err);
-            return;
-          }
+    /* Get Protperties interface */
+    this.props = bluezDBus.getProperties(this.path, 'org.bluez.GattService1',
+      this._servicePropertiesUpdate.bind(this), /* Property changed */
+      (err) => { /* All propertires were resolved */
+        if (err) {
+          this.debug('Failed getting all properties:' + err);
+          if (cb) cb(err);
+          return;
+        }
 
-          /* At this point, the device is connected and the services are already
-           * resolved, just look for the relevant characteristics */
-          bluezDBus.getAllObjects(function(err, objects) {
-            if (err)
-              throw 'Failed getting all objects';
+        /* At this point, the device is connected and the services are already
+         * resolved, just look for the relevant characteristics */
+        bluezDBus.getAllObjects((err, objects) => {
+          if (err)
+            throw 'Failed getting all objects';
 
-            Object.keys(objects).forEach(function(key) {
-              this._interfaceAdded(key, objects[key]);
-            }.bind(this));
+          Object.keys(objects).forEach((key) => {
+            this._interfaceAdded(key, objects[key]);
+          });
 
-            /* The new service is ready */
-            if (cb) cb();
-          }.bind(this));
-        }.bind(this));
-    }.bind(this)
-  );
+          /* The new service is ready */
+          if (cb) cb();
+        });
+      });
+  });
 
   /* Save the event handler so we can remove it later */
   this.ifaceEvents = bluezDBus.onInterfaces(this._interfaceAdded.bind(this),
@@ -87,13 +85,13 @@ BluezService.prototype._interfaceAdded = function(path, objects) {
 
   this.debug('A characteristic was added: ' + path);
   var characteristic = new BluezCharacteristic(path);
-  characteristic.init(function(err) {
+  characteristic.init((err) => {
     if (err) {
       this.debug('Failed initializing new characteristic ' + path + ': ' + err);
       return;
     }
     this.emit('characteristic', characteristic);
-  }.bind(this));
+  });
 }
 
 BluezService.prototype._interfaceRemoved = function(path, objects) {

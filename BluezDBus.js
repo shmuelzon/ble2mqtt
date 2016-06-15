@@ -1,8 +1,8 @@
-var events = require('events')
-var debug = require('debug')('BluezDBus');
-var DBus = require('dbus');
-var dbus = new DBus();
-var bus = dbus.getBus('system');
+const events = require('events')
+const debug = require('debug')('BluezDBus');
+const DBus = require('dbus');
+const dbus = new DBus();
+const bus = dbus.getBus('system');
 
 var bluezDBus = new events.EventEmitter();
 
@@ -16,9 +16,7 @@ function _notifyPropertyChange(func, properties) {
   if (!func)
     return;
 
-  Object.keys(properties).forEach(function(key) {
-    func(key, properties[key]);
-  });
+  Object.keys(properties).forEach((key) => func(key, properties[key]));
 }
 
 bluezDBus.setMaxListeners(Infinity);
@@ -29,7 +27,7 @@ bluezDBus.getProperties = function(path, interfaceName, propertyChangedCb, resol
     }
   }
   bluezDBus.getInterface(path, 'org.freedesktop.DBus.Properties',
-    function(err, iface) {
+    (err, iface) => {
       if (err) {
         debug('Failed getting properties for ' + path + ': ' + err);
         return;
@@ -37,7 +35,7 @@ bluezDBus.getProperties = function(path, interfaceName, propertyChangedCb, resol
 
       /* Save interface an callback so we can unregister later */
       ctx.iface = iface;
-      ctx.cb = function(_interfaceName, properties) {
+      ctx.cb = (_interfaceName, properties) => {
         if (_interfaceName !== interfaceName)
           return;
 
@@ -47,7 +45,7 @@ bluezDBus.getProperties = function(path, interfaceName, propertyChangedCb, resol
       iface.on('PropertiesChanged', ctx.cb);
 
       /* Get all properties */
-      iface.GetAll['finish'] = function(properties) {
+      iface.GetAll['finish'] = (properties) => {
         _notifyPropertyChange(propertyChangedCb, properties);
 
         if (resolvedCb)
@@ -64,12 +62,12 @@ bluezDBus.getProperties = function(path, interfaceName, propertyChangedCb, resol
 bluezDBus.getAllObjects = function(cb) {
   if (objectManagerInterface === null) {
     /* ObjectManager isn't available yet, try again later */
-    setTimeout(function() { bluezDBus.getAllObjects(cb); }, 100);
+    setTimeout(() => bluezDBus.getAllObjects(cb), 100);
     return;
   }
 
   /* Set callback functions */
-  objectManagerInterface.GetManagedObjects['finish'] = function(objects) {
+  objectManagerInterface.GetManagedObjects['finish'] = (objects) => {
     cb(undefined, objects);
   };
   objectManagerInterface.GetManagedObjects['error'] = cb;
@@ -97,7 +95,7 @@ bluezDBus.onInterfaces = function(interfaceAddedCb, interfaceRemovedCb) {
 
 /* Get ObjectManager and register events */
 bluezDBus.getInterface('/', 'org.freedesktop.DBus.ObjectManager',
-  function(err, iface) {
+  (err, iface) => {
     if (err)
       throw 'Failed getting the ObjectManager interface: ' + err;
 
@@ -105,10 +103,10 @@ bluezDBus.getInterface('/', 'org.freedesktop.DBus.ObjectManager',
     objectManagerInterface = iface;
 
     /* Listen on object changes and notify */
-    objectManagerInterface.on('InterfacesAdded', function(path, objects) {
+    objectManagerInterface.on('InterfacesAdded', (path, objects) => {
       bluezDBus.emit('interfaceAdded', path, objects);
     });
-    objectManagerInterface.on('InterfacesRemoved', function(path, objects) {
+    objectManagerInterface.on('InterfacesRemoved', (path, objects) => {
       bluezDBus.emit('interfaceRemoved', path, objects);
     });
   }
