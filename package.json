@@ -4,6 +4,7 @@
   "description": "A BLE to MQTT bridge",
   "main": "app.js",
   "scripts": {
+    "prestart": "node utils/getGattAssignedNumbers.js",
     "start": "DEBUG=ble2mqtt node app.js",
     "dev": "DEBUG=* node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"

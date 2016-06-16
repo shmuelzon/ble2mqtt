@@ -3,3 +3,6 @@
 tags
 
 node_modules
+
+resources/characteristics.json
+resources/services.json
