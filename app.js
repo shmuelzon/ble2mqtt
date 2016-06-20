@@ -5,6 +5,7 @@ const bluez = require('./Bluez');
 const config = require('./config');
 const servicesList = require('./resources/services');
 const characteristicsList = require('./resources/characteristics');
+const utils = require('./utils');
 
 var adapters = {}
 var characteristics = {};
@@ -16,13 +17,21 @@ _.extend(servicesList, config.ble.services);
 _.extend(characteristicsList, config.ble.characteristics);
 
 function getServiceName(service) {
-  var name = servicesList[service.UUID];
-  return name ? name : service.UUID;
+  var s = servicesList[service.UUID];
+  return s ? s.name.replace(/\s/g, '') : service.UUID;
 }
 
 function getCharacteristicName(characteristic) {
-  var name = characteristicsList[characteristic.UUID]
-  return name ? name : characteristic.UUID;
+  var c = characteristicsList[characteristic.UUID]
+  return c ? c.name.replace(/\s/g, '') : characteristic.UUID;
+}
+
+function getCharacteristicValue(characteristic) {
+  var c = characteristicsList[characteristic.UUID]
+  var res = utils.bufferToGattTypes(new Buffer(characteristic.Value),
+    c && c.types ? c.types : []);
+
+  return (res.length == 1 ? res[0] : res).toString();
 }
 
 function shouldConnect(device) {
@@ -45,15 +54,17 @@ mqtt.on('message', (topic, message) => {
   if (!c)
     return;
 
-  var newVal = eval('[' + message + ']');
+  /* Convert value back to byte array */
+  var newBuf = utils.gattTypesToBuffer(JSON.parse('[' + message + ']'),
+    c.Value.length, characteristicsList[c.UUID].types);
 
   /* Is this a different value? */
-  if (_.isEqual(c.Value, newVal))
+  if (newBuf.compare(new Buffer(c.Value)) == 0)
     return;
 
   /* Write the new value and read it back */
-  debug('Writing ' + newVal + ' to ' + c.UUID);
-  c.Write(newVal, () => c.Read());
+  debug('Writing ' + message + ' to ' + c.UUID);
+  c.Write(Array.prototype.slice.call(newBuf.slice(), 0), () => c.Read());
 });
 
 bluez.on('adapter', (adapter) => {
@@ -84,8 +95,10 @@ bluez.on('adapter', (adapter) => {
 
         characteristic.on('propertyChanged', (key, value) => {
           if (key === 'Value') {
-            debug('Got new value for ' + characteristic.UUID + ': ' + value);
-            mqtt.publish(get_topic, value.toString(), config.mqtt.publish);
+            var val = getCharacteristicValue(characteristic);
+
+            debug('Got new value for ' + characteristic.UUID + ': ' + val);
+            mqtt.publish(get_topic, val, config.mqtt.publish);
           }
         });
 

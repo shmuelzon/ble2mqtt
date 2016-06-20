@@ -30,8 +30,8 @@ writing a 64-bit value would look like `10,231,32,24`.
       changes, topic names (both published and subscribed) need to be updated
   * ~~Use service/characteristic name instead of UUID~~
     * ~~Extendable via configuration file~~
-* Pretty values (convert byte array to Boolean, String, etc.):
-  * Configuration file can define custom characteristics
+* ~~Pretty values (convert byte array to Boolean, String, etc.):~~
+  * ~~Configuration file can define custom characteristics~~
 * Refactoring
   * Create a separate NPM module out of the BlueZ code
   * Lots of similar code copy-pasted, we can do better
