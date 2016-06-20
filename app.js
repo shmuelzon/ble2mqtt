@@ -16,6 +16,10 @@ var mqtt = _mqtt.connect(config.mqtt.server);
 _.extend(servicesList, config.ble.services);
 _.extend(characteristicsList, config.ble.characteristics);
 
+function getDeviceName(device) {
+  return device[config.mqtt.topics.device_name];
+}
+
 function getServiceName(service) {
   var s = servicesList[service.UUID];
   return s ? s.name.replace(/\s/g, '') : service.UUID;
@@ -63,7 +67,7 @@ mqtt.on('message', (topic, message) => {
     return;
 
   /* Write the new value and read it back */
-  debug('Writing ' + message + ' to ' + c.UUID);
+  debug('Writing "' + message + '" to ' + getCharacteristicName(c));
   c.Write(Array.prototype.slice.call(newBuf.slice(), 0), () => c.Read());
 });
 
@@ -76,14 +80,15 @@ bluez.on('adapter', (adapter) => {
     debug('Found new device: ' + device.Address + ' (' + device.Alias +')');
 
     device.on('service', (service) => {
-      debug('Found new service: ' + service.UUID);
+      debug('Found new service: ' + [getDeviceName(device),
+        getServiceName(service)].join('/'));
 
       service.on('characteristic', (characteristic) => {
-        debug('Found new characteristic: ' + characteristic.UUID + ' (' +
-          characteristic.Flags + ')');
-        var get_topic = device[config.mqtt.topics.device_name] + '/' +
-          getServiceName(service) + '/' + getCharacteristicName(characteristic);
+        var get_topic = [getDeviceName(device), getServiceName(service),
+          getCharacteristicName(characteristic)].join('/');
         var set_topic = get_topic + config.mqtt.topics.set_suffix;
+        debug('Found new characteristic: ' + get_topic + ' (' +
+          characteristic.Flags + ')');
 
         /* Listen on notifications */
         if (characteristic.Flags.indexOf('notify') !== -1)
@@ -97,7 +102,7 @@ bluez.on('adapter', (adapter) => {
           if (key === 'Value') {
             var val = getCharacteristicValue(characteristic);
 
-            debug('Got new value for ' + characteristic.UUID + ': ' + val);
+            debug('Got new value for ' + get_topic + ': ' + val);
             mqtt.publish(get_topic, val, config.mqtt.publish);
           }
         });
