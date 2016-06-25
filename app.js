@@ -32,8 +32,15 @@ function getCharacteristicName(characteristic) {
 
 function getCharacteristicValue(characteristic) {
   var c = characteristicsList[characteristic.UUID]
-  var res = utils.bufferToGattTypes(new Buffer(characteristic.Value),
-    c && c.types ? c.types : []);
+  var res;
+
+  try {
+    res = utils.bufferToGattTypes(new Buffer(characteristic.Value),
+      c && c.types ? c.types : []);
+  } catch (e) {
+    debug('Failed parsing ' + characteristic.UUID);
+    res = characteristic.Value;
+  }
 
   return (res.length == 1 ? res[0] : res).toString();
 }
