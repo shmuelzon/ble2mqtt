@@ -67,7 +67,9 @@ function saveObjectToFile(object, file) {
     fs.mkdirSync(dir);
 
   debug('Writing out ' + file);
-  fs.writeFileSync(file, JSON.stringify(object, null, 2));
+  fs.writeFileSync(file, JSON.stringify(
+    Object.keys(object).sort().reduce((r, k) => (r[k] = object[k], r), {}),
+    null, 2));
 }
 
 function parseServices(str, file) {
