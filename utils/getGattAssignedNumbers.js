@@ -9,11 +9,11 @@ const path = require('path');
 const util = require('util');
 const debug = require('debug')('GattNumbersToJson')
 
-const GATT_URL = 'https://developer.bluetooth.org/gatt'
-const SERVICES_URL = GATT_URL + '/services/Pages/ServicesHome.aspx';
-const CHARACTERISTICS_URL = GATT_URL +
-  '/characteristics/Pages/CharacteristicsHome.aspx'
-const CHARACTERISTIC_URL = GATT_URL + '/characteristics/Documents/'
+const GATT_URL = 'https://www.bluetooth.com/specifications/gatt'
+const SERVICES_URL = GATT_URL + '/services';
+const CHARACTERISTICS_URL = GATT_URL + '/characteristics'
+const CHARACTERISTIC_URL =
+  'https://www.bluetooth.com/api/gatt/XmlFile?xmlFileName='
 
 const SERVICES_FILE = 'resources/services.json';
 const CHARACTERISTICS_FILE = 'resources/characteristics.json';
