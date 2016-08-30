@@ -6,6 +6,7 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const url = require('url');
 const util = require('util');
 const debug = require('debug')('GattNumbersToJson')
 
@@ -39,8 +40,13 @@ function buildGattRegex(type) {
     '<td[^>]*>([^<]*)<', 'gi');
 }
 
-function download(url, cb) {
-  https.get(url, function(res) {
+function download(uri, cb) {
+  var options = url.parse(uri);
+  /* Not the best solution, but the simplest and does not require any
+   * additionall moduled (e.g. ssl-root-cas) */
+  options.rejectUnauthorized = false;
+
+  https.get(options, function(res) {
     var body ='';
 
     res.on('data', (chunk) => body = body + chunk);
