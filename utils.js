@@ -221,7 +221,7 @@ module.exports.bufferToGattTypes = function(buf, types) {
 }
 
 module.exports.gattTypesToBuffer = function(arr, length, types) {
-  var buf = new Buffer(length);
+  var buf = Buffer.allocUnsafe(length);
   var offset = 0;
 
   _(types).each((type, i) => {

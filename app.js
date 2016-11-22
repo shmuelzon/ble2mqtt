@@ -35,7 +35,7 @@ function getCharacteristicValue(characteristic) {
   var res;
 
   try {
-    res = utils.bufferToGattTypes(new Buffer(characteristic.Value),
+    res = utils.bufferToGattTypes(Buffer.from(characteristic.Value),
       c && c.types ? c.types : []);
   } catch (e) {
     debug('Failed parsing ' + characteristic.UUID);
@@ -70,7 +70,7 @@ mqtt.on('message', (topic, message) => {
     c.Value.length, characteristicsList[c.UUID].types);
 
   /* Is this a different value? */
-  if (newBuf.compare(new Buffer(c.Value)) == 0)
+  if (newBuf.compare(Buffer.from(c.Value)) == 0)
     return;
 
   /* Write the new value and read it back */
