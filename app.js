@@ -8,7 +8,6 @@ const servicesList = require('./resources/services');
 const characteristicsList = require('./resources/characteristics');
 const utils = require('./utils');
 
-var adapters = {}
 var characteristics = {};
 
 var mqtt = _mqtt.connect(config.mqtt.server);
@@ -85,9 +84,10 @@ mqtt.on('message', (topic, message) => {
   c.Write(Array.prototype.slice.call(newBuf.slice(), 0), () => c.Read());
 });
 
+process.on('exit', () => mqtt.end(true));
+
 bluez.on('adapter', (adapter) => {
   debug('Found new adapter: ' + adapter);
-  adapters[adapter.path] = adapter;
 
   adapter.on('device', (device) => {
     if (!shouldConnect(device)) return;
@@ -165,10 +165,7 @@ bluez.on('adapter', (adapter) => {
     });
   });
 
-  adapter.on('removed', () => {
-    debug(adapter + ' was removed');
-    delete adapters[adapter.path];
-  });
+  adapter.on('removed', () => debug(adapter + ' was removed'));
 
   adapter.powerOn((err) => {
     if (err) return;
@@ -185,23 +182,12 @@ bluez.on('adapter', (adapter) => {
       });
     })
   });
+
+  process.on('exit', () => {
+    if (adapter.Powered === true)
+      adapter.powerOff();
+  });
 });
 
-function cleanupAndExit() {
-  debug('Shutting down...');
-  var tasks = 0;
-
-  /* Disconnect from MQTT server */
-  mqtt.end();
-
-  /* Turn off all adapters (will also disconnect from devices) */
-  _(adapters).each((adapter) => {
-    tasks++;
-    adapter.powerOff(() => tasks--);
-  });
-
-  /* Wait for operations to end, then exit */
-  setInterval(() => { if (tasks == 0) process.exit(0); }, 100);
-}
-process.on('SIGINT', cleanupAndExit);
-process.on('SIGTERM', cleanupAndExit);
+process.on('SIGINT', () => process.exit(0));
+process.on('SIGTERM', () => process.exit(0));
