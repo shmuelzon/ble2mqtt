@@ -1,5 +1,6 @@
 const debug = require('debug')('ble2mqtt');
 const _ = require('underscore');
+const underscoreDeepExtend = require('underscore-deep-extend');
 const _mqtt = require('mqtt');
 const bluez = require('./Bluez');
 const config = require('./config');
@@ -12,9 +13,10 @@ var characteristics = {};
 
 var mqtt = _mqtt.connect(config.mqtt.server);
 
+_.mixin({deepExtend: underscoreDeepExtend(_)});
 /* Add user-defined names from the configuration file */
-_.extend(servicesList, config.ble.services);
-_.extend(characteristicsList, config.ble.characteristics);
+_.deepExtend(servicesList, config.ble.services);
+_.deepExtend(characteristicsList, config.ble.characteristics);
 
 function getDeviceName(device) {
   return device[config.mqtt.topics.device_name];
@@ -28,6 +30,11 @@ function getServiceName(service) {
 function getCharacteristicName(characteristic) {
   var c = characteristicsList[characteristic.UUID]
   return c ? c.name.replace(/\s/g, '') : characteristic.UUID;
+}
+
+function getCharacteristicPoll(characteristic) {
+  var c = characteristicsList[characteristic.UUID]
+  return c ? c.poll : 0;
 }
 
 function getCharacteristicValue(characteristic) {
@@ -104,6 +111,11 @@ bluez.on('adapter', (adapter) => {
         /* Read initial value */
         if (characteristic.Flags.indexOf('read') !== -1)
           characteristic.Read(); /* We'll get the value in the Value property */
+
+        /* Poll characteristic if configured */
+        var poll_period = getCharacteristicPoll(characteristic);
+        if (poll_period > 0)
+          setInterval(() => { characteristic.Read(); }, poll_period * 1000);
 
         characteristic.on('propertyChanged', (key, value) => {
           if (key === 'Value') {
