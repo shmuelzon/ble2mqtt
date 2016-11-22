@@ -1,5 +1,6 @@
 const EventEmitter = require('events').EventEmitter;
 const util = require('util');
+const _ = require('underscore');
 const bluezDBus = require('./BluezDBus');
 
 module.exports = BluezCharacteristic;
@@ -52,6 +53,9 @@ BluezCharacteristic.prototype.toString = function() {
 }
 
 BluezCharacteristic.prototype._characteristicPropertiesUpdate = function(key, value) {
+  if (_.isEqual(this[key], value))
+    return;
+
   this.debug(key + ' changed from ' + this[key] + ' to ' + value);
   this[key] = value;
   this.emit('propertyChanged', key, value);
