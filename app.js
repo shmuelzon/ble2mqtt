@@ -104,6 +104,14 @@ bluez.on('adapter', (adapter) => {
         debug('Found new characteristic: ' + get_topic + ' (' +
           characteristic.Flags + ')');
 
+        var read = function() {
+          characteristic.Read((err) => {
+            if (!err) return;
+
+            debug('Failed reading ' + get_topic + ' ('+ err + '), retrying.');
+            setImmediate(() => read());
+          });
+        }
         var publish = function() {
           var val = getCharacteristicValue(characteristic);
 
@@ -119,9 +127,9 @@ bluez.on('adapter', (adapter) => {
         if (characteristic.Value && characteristic.Value.length != 0)
           publish();
 
-        /* Read initial value */
+        /* Read current value */
         if (characteristic.Flags.indexOf('read') !== -1)
-          characteristic.Read(); /* We'll get the value in the Value property */
+          read(); /* We'll get the new value in the propertyChanged event */
 
         /* Poll characteristic if configured */
         var poll_period = getCharacteristicPoll(characteristic);
