@@ -104,9 +104,20 @@ bluez.on('adapter', (adapter) => {
         debug('Found new characteristic: ' + get_topic + ' (' +
           characteristic.Flags + ')');
 
+        var publish = function() {
+          var val = getCharacteristicValue(characteristic);
+
+          debug('Publishing ' + get_topic + ': ' + val);
+          mqtt.publish(get_topic, val, config.mqtt.publish);
+        }
+
         /* Listen on notifications */
         if (characteristic.Flags.indexOf('notify') !== -1)
           characteristic.NotifyStart();
+
+        /* Publish cached value, if exists */
+        if (characteristic.Value && characteristic.Value.length != 0)
+          publish();
 
         /* Read initial value */
         if (characteristic.Flags.indexOf('read') !== -1)
@@ -118,12 +129,8 @@ bluez.on('adapter', (adapter) => {
           setInterval(() => { characteristic.Read(); }, poll_period * 1000);
 
         characteristic.on('propertyChanged', (key, value) => {
-          if (key === 'Value') {
-            var val = getCharacteristicValue(characteristic);
-
-            debug('Got new value for ' + get_topic + ': ' + val);
-            mqtt.publish(get_topic, val, config.mqtt.publish);
-          }
+          if (key === 'Value')
+            publish();
         });
 
         characteristic.on('removed', () => {
