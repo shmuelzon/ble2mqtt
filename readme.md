@@ -105,6 +105,16 @@ configuration:
     ]
     ```
 
+* `passkeys` - An object containing the passkey (number 000000~999999) used for
+  out-of-band authorization. Each entry is the MAC address of the BLE device and
+  the value is the passkey to use.
+
+    ```json
+    "passkeys": {
+      "B0:B4:48:D3:63:98": 123456
+    }
+    ```
+
 ## Installation
 
 This app requires node version >= 4.3.2 (need support for arrow functions) as
@@ -273,8 +283,8 @@ sudo systemctl start ble2mqtt@$USER.service
 * Refactoring
   * Create a separate NPM module out of the BlueZ code
   * Lots of similar code copy-pasted, we can do better
-* Security
-  * Support pairing via AgentManager1 API
+* ~~Security~~
+  * ~~Support pairing via AgentManager1 API~~
 
 ## License
 
