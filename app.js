@@ -88,25 +88,27 @@ mqtt.on('message', (topic, message) => {
 process.on('exit', () => mqtt.end(true));
 
 /* Create agent for pairing devices */
-var agent = new BluezAgent('com.shmulzon.ble2mqtt.agent',
-  '/com/shmuelzon/ble2mqtt/agent');
-agent.setPasskeyHandler((device) => {
-  var mac = device.match(/([0-9A-F]{2}_?){6}/)[0].replace(/_/g, ':');
-  var list = config.ble.passkeys;
-  var passkey = list ? list[mac] : null
+if (!_.isEmpty(config.ble.passkeys)) {
+  var agent = new BluezAgent('com.shmulzon.ble2mqtt.agent',
+    '/com/shmuelzon/ble2mqtt/agent');
+  agent.setPasskeyHandler((device) => {
+    var mac = device.match(/([0-9A-F]{2}_?){6}/)[0].replace(/_/g, ':');
+    var list = config.ble.passkeys;
+    var passkey = list ? list[mac] : null
 
-  debug('Passkey for ' + mac + ': ' + passkey);
-  return passkey;
-});
-agent.register((err) => {
-  if (err) {
-    debug('Failed registering agent');
-    return;
-  }
+    debug('Passkey for ' + mac + ': ' + passkey);
+    return passkey;
+  });
+  agent.register((err) => {
+    if (err) {
+      debug('Failed registering agent');
+      return;
+    }
 
-  debug('Registered agent');
-  agent.setDefault()
-});
+    debug('Registered agent');
+    agent.setDefault()
+  });
+}
 
 bluez.on('adapter', (adapter) => {
   debug('Found new adapter: ' + adapter);
