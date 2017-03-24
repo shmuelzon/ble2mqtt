@@ -220,7 +220,7 @@ EOF
 # Re-enable tabs
 bind '\C-i:complete'
 
-./configure --disable-cups --disable-obex --prefix=/usr --libexecdir=/usr/lib --localstatedir=/var/lib/bluetooth/
+./configure --disable-cups --disable-obex --enable-deprecated --prefix=/usr --libexecdir=/usr/lib --localstatedir=/var/lib/bluetooth/
 make -j 4
 sudo checkinstall -y --nodoc --maintainer=shmuelzon@gmail.com
 ```
