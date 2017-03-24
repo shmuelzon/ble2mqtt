@@ -131,6 +131,9 @@ bluez.on('adapter', (adapter) => {
         var read = function() {
           characteristic.Read((err) => {
             if (!err) return;
+            /* If the characteristic was removed while reading, ignore it */
+            if (err.message == 'org.freedesktop.DBus.Error.UnknownObject')
+              return;
 
             debug('Failed reading ' + get_topic + ' ('+ err + '), retrying.');
             setImmediate(() => read());
