@@ -136,13 +136,13 @@ sudo apt-get update
 sudo apt-get install -y libusb-dev libdbus-1-dev libglib2.0-dev libudev-dev \
   libical-dev libreadline-dev checkinstall 
 
-# Compile + Install Bluez 5.40
+# Compile + Install Bluez 5.45
 mkdir -p ~/Downloads
-wget -O ~/Downloads/bluez-5.40.tar.xz http://www.kernel.org/pub/linux/bluetooth/bluez-5.40.tar.xz
+wget -O ~/Downloads/bluez-5.45.tar.xz http://www.kernel.org/pub/linux/bluetooth/bluez-5.45.tar.xz
 mkdir -p ~/code
 cd ~/code
-tar -xvf ~/Downloads/bluez-5.40.tar.xz
-cd bluez-5.40
+tar -xvf ~/Downloads/bluez-5.45.tar.xz
+cd bluez-5.45
 
 # Allow tabs to be tabs (for patches)
 bind '\C-i:self-insert'
