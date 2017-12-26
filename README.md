@@ -4,6 +4,8 @@ This project aims to be a BLE to MQTT bridge, i.e. expose BLE GATT
 characteristics as MQTT topics for bidirectional communication. It relies on the
 BlueZ DBus API and as such is supported on Linux only.
 
+Note: I've also started a similar implementation running on an ESP32 that can be found [here](https://github.com/shmuelzon/esp32-ble2mqtt).
+
 For example, if a device with a MAC address of `A0:E6:F8:50:72:53` exposes the
 [0000180f-0000-1000-8000-00805f9b34fb service](https://developer.bluetooth.org/gatt/services/Pages/ServiceViewer.aspx?u=org.bluetooth.service.battery_service.xml)
 (Battery Service) which includes the
