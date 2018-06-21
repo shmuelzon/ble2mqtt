@@ -238,7 +238,7 @@ sudo apt-get install -y nodejs
 ### Startup on boot
 
 Raspbian Jesse uses systemd as its init process, so I created a service file for
-it. Make sure to add your used to the `bluetooth` group so you can run this
+it. Make sure to add your user to the `bluetooth` group so you can run this
 application without running as root.
 
 ```bash
