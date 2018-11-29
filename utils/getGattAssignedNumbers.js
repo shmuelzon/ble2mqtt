@@ -3,7 +3,7 @@
  * keep the implementation simple and so it won't require any additional
  * packages (e.g. XML parser) */
 
-const https = require('https');
+const request = require('request')
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
@@ -41,19 +41,21 @@ function buildGattRegex(type) {
 }
 
 function download(uri, cb) {
-  var options = url.parse(uri);
-  /* Not the best solution, but the simplest and does not require any
-   * additionall moduled (e.g. ssl-root-cas) */
-  options.rejectUnauthorized = false;
+  var options = {
+    uri: uri,
+    jar: true,
+    /* Not the best solution, but the simplest and does not require any
+     * additionall moduled (e.g. ssl-root-cas) */
+    strictSSL: false,
+  };
 
-  https.get(options, function(res) {
-    var body ='';
+  request(options, function(err, res, body) {
+    if (err) {
+      console.error(err);
+      process.exit(-1);
+    }
 
-    res.on('data', (chunk) => body = body + chunk);
-    res.on('end', () => cb(body));
-  }).on('error', (e) => {
-    console.error(e);
-    process.exit(-1);
+    cb(body);
   });
 }
 
