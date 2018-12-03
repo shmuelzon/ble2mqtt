@@ -73,8 +73,9 @@ mqtt.on('message', (topic, message) => {
     return;
 
   /* Convert value back to byte array */
+  var info = characteristicsList[c.UUID];
   var newBuf = utils.gattTypesToBuffer(JSON.parse('[' + message + ']'),
-    c.Value.length, characteristicsList[c.UUID].types);
+    c.Value.length, info && info.types ? info.types : []);
 
   /* Is this a different value? */
   if (newBuf.compare(Buffer.from(c.Value)) == 0)

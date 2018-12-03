@@ -333,5 +333,9 @@ module.exports.gattTypesToBuffer = function(arr, length, types) {
     }
   });
 
+  /* Assume the rest is a byte array */
+  for (i = types.length; i < arr.length; i++)
+    buf.writeUIntLE(arr[i], offset++, 1);
+
   return buf;
 }
