@@ -225,11 +225,11 @@ module.exports.gattTypesToBuffer = function(arr, length, types) {
   var offset = 0;
 
   _(types).each((type, i) => {
-    var val = arr[i];
+    var val = Number(arr[i]);
 
     switch (type) {
       case 'boolean':
-        buf.writeUIntLE(val == true ? 1 : 0, offset, 1);
+        buf.writeUIntLE(arr[i] === 'true' ? 1 : 0, offset, 1);
         offset += 1;
         break;
       case '2bit':
@@ -295,10 +295,10 @@ module.exports.gattTypesToBuffer = function(arr, length, types) {
         break;
       /* String values consume the rest of the buffer */
       case 'utf8s':
-        offset += buf.write(val, offset, 'utf8');
+        offset += buf.write(arr[i], offset, 'utf8');
         break;
       case 'utf16s':
-        offset += buf.write(val, offset, 'utf16');
+        offset += buf.write(arr[i], offset, 'utf16');
         break;
       /* IEEE-754 floating point format */
       case 'float32':
