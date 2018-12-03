@@ -221,7 +221,7 @@ module.exports.bufferToGattTypes = function(buf, types) {
 }
 
 module.exports.gattTypesToBuffer = function(arr, length, types) {
-  var buf = Buffer.allocUnsafe(length);
+  var buf = Buffer.allocUnsafe(1024);
   var offset = 0;
 
   _(types).each((type, i) => {
@@ -337,5 +337,5 @@ module.exports.gattTypesToBuffer = function(arr, length, types) {
   for (i = types.length; i < arr.length; i++)
     buf.writeUIntLE(arr[i], offset++, 1);
 
-  return buf;
+  return buf.slice(0, offset);
 }
